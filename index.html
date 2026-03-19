@@ -393,31 +393,150 @@ footer {
 footer p { color: rgba(255,255,255,.4); font-size: .85rem; margin-top: .5rem; font-weight: 600; }
 footer .footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,.07); font-size: .75rem; color: rgba(255,255,255,.2); }
 
-/* ── WHATSAPP FLOATING BUTTON ── */
-.wa-float {
+/* ── CART FAB ── */
+.cart-fab {
   position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
-  display: flex; align-items: center; gap: .6rem;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--red));
+  border: none; font-size: 1.7rem; cursor: pointer;
+  box-shadow: 0 6px 30px rgba(255,122,0,.6), 0 0 0 0 rgba(255,122,0,.3);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .2s, box-shadow .2s;
+  animation: fabPulse 2.5s ease-in-out infinite;
+}
+.cart-fab:hover { transform: scale(1.1); }
+.cart-fab-count {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--yellow); color: #1A0A00;
+  font-family: 'Nunito', sans-serif; font-size: .7rem; font-weight: 900;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #0D0500;
+  transform: scale(0); transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.cart-fab-count.visible { transform: scale(1); }
+@keyframes fabPulse {
+  0%,100% { box-shadow: 0 6px 30px rgba(255,122,0,.6), 0 0 0 0 rgba(255,122,0,.3); }
+  50%      { box-shadow: 0 6px 30px rgba(255,122,0,.6), 0 0 0 12px rgba(255,122,0,0); }
+}
+
+/* ── CART OVERLAY ── */
+.cart-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.cart-overlay.open { opacity: 1; pointer-events: all; }
+
+/* ── CART DRAWER ── */
+.cart-drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 1001;
+  width: min(420px, 100vw);
+  background: #110800;
+  border-left: 2px solid rgba(255,122,0,.25);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+  box-shadow: -20px 0 80px rgba(0,0,0,.7);
+}
+.cart-drawer.open { transform: translateX(0); }
+
+.cart-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.4rem 1.5rem;
+  border-bottom: 1.5px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+}
+.cart-title {
+  font-family: 'Righteous', cursive; font-size: 1.35rem;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.cart-close {
+  background: rgba(255,255,255,.08); border: none; color: #fff;
+  width: 32px; height: 32px; border-radius: 50%; font-size: .9rem;
+  cursor: pointer; transition: background .2s;
+}
+.cart-close:hover { background: rgba(255,59,59,.4); }
+
+.cart-empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: .6rem;
+  color: rgba(255,255,255,.35);
+}
+.cart-empty-emoji { font-size: 3.5rem; opacity: .5; }
+.cart-empty-text { font-weight: 800; font-size: 1rem; }
+.cart-empty-sub { font-size: .8rem; font-weight: 600; }
+
+.cart-items {
+  flex: 1; overflow-y: auto; padding: .5rem 0;
+}
+.cart-items::-webkit-scrollbar { width: 4px; }
+.cart-items::-webkit-scrollbar-track { background: transparent; }
+.cart-items::-webkit-scrollbar-thumb { background: rgba(255,122,0,.4); border-radius: 4px; }
+
+.cart-item {
+  display: flex; align-items: center; gap: 1rem;
+  padding: .9rem 1.4rem;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  animation: slideIn .25s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+.cart-item-emoji { font-size: 2rem; flex-shrink: 0; }
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-name { font-size: .9rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cart-item-price { font-family: 'Righteous', cursive; font-size: .95rem;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-top: .1rem;
+}
+.cart-item-qty {
+  display: flex; align-items: center; gap: .5rem; flex-shrink: 0;
+}
+.qty-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.06); color: #fff; font-size: 1rem; font-weight: 900;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s;
+  line-height: 1;
+}
+.qty-btn:hover { background: rgba(255,122,0,.3); border-color: var(--orange); }
+.qty-num { font-weight: 900; font-size: .95rem; min-width: 18px; text-align: center; }
+
+.cart-footer {
+  padding: 1.2rem 1.5rem 1.5rem;
+  border-top: 1.5px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+}
+.cart-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1rem; font-weight: 800; font-size: .95rem;
+  color: rgba(255,255,255,.6);
+}
+.cart-total-amt {
+  font-family: 'Righteous', cursive; font-size: 1.6rem;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.cart-order-btn {
+  width: 100%; padding: 1rem; border-radius: 14px; border: none;
   background: linear-gradient(135deg, #25D366, #128C7E);
   color: #fff; font-family: 'Nunito', sans-serif;
-  font-size: .9rem; font-weight: 900; letter-spacing: .03em;
-  padding: .8rem 1.4rem .8rem 1rem;
-  border-radius: 50px; text-decoration: none;
-  box-shadow: 0 6px 30px rgba(37,211,102,.55), 0 0 0 0 rgba(37,211,102,.4);
-  animation: waPulse 2.5s ease-in-out infinite;
-  transition: transform .2s, box-shadow .2s;
+  font-size: 1rem; font-weight: 900; letter-spacing: .04em;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem;
+  box-shadow: 0 6px 25px rgba(37,211,102,.5);
+  transition: transform .15s, box-shadow .15s;
 }
-.wa-float:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 12px 40px rgba(37,211,102,.7);
+.cart-order-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(37,211,102,.65); }
+.cart-clear-btn {
+  width: 100%; margin-top: .6rem; padding: .6rem;
+  background: transparent; border: 1.5px solid rgba(255,59,59,.3);
+  border-radius: 10px; color: rgba(255,59,59,.6);
+  font-family: 'Nunito', sans-serif; font-size: .8rem; font-weight: 800;
+  cursor: pointer; transition: all .15s; letter-spacing: .05em; text-transform: uppercase;
 }
-.wa-float .wa-icon { font-size: 1.4rem; line-height: 1; }
-.wa-float .wa-text { line-height: 1.1; }
-.wa-float .wa-text small { display: block; font-size: .65rem; font-weight: 700; opacity: .8; letter-spacing: .05em; text-transform: uppercase; }
-
-@keyframes waPulse {
-  0%,100% { box-shadow: 0 6px 30px rgba(37,211,102,.55), 0 0 0 0 rgba(37,211,102,.4); }
-  50%      { box-shadow: 0 6px 30px rgba(37,211,102,.55), 0 0 0 12px rgba(37,211,102,.0); }
-}
+.cart-clear-btn:hover { background: rgba(255,59,59,.15); border-color: var(--red); color: var(--red); }
 
 /* ── ORDER NOW CARD BUTTON ── */
 .wa-order-btn {
@@ -519,7 +638,7 @@ footer .footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px s
   </ul>
   <div style="display:flex;align-items:center;gap:.8rem;">
     <div class="nav-halal"><span class="hicon">☪️</span> 100% Halal</div>
-    <a href="https://wa.me/917702216833?text=Hi!%20I'd%20like%20to%20place%20an%20order%20from%20Crispy%20Cravings%20%F0%9F%94%A5" target="_blank" class="wa-order-btn"><span class="wi">💬</span> Order Now</a>
+    <button onclick="openCart()" class="wa-order-btn"><span class="wi">🛒</span> Cart <span id="navCartCount" style="background:var(--yellow);color:#1A0A00;border-radius:50px;padding:.1rem .45rem;font-size:.7rem;margin-left:.2rem;display:none;">0</span></button>
   </div>
 </nav>
 
@@ -912,11 +1031,36 @@ footer .footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px s
   </div>
 </section>
 
-<!-- FLOATING WHATSAPP BUTTON -->
-<a class="wa-float" href="https://wa.me/917702216833?text=Hi!%20I'd%20like%20to%20place%20an%20order%20from%20Crispy%20Cravings%20%F0%9F%94%A5" target="_blank">
-  <span class="wa-icon">📲</span>
-  <span class="wa-text">Order on WhatsApp<small>Tap to chat instantly</small></span>
-</a>
+<!-- CART FAB -->
+<button class="cart-fab" id="cartFab" onclick="openCart()">
+  🛒
+  <span class="cart-fab-count" id="cartCount">0</span>
+</button>
+
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <div class="cart-title">🛒 Your Order</div>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-empty" id="cartEmpty">
+    <div class="cart-empty-emoji">🍽️</div>
+    <div class="cart-empty-text">Your cart is empty</div>
+    <div class="cart-empty-sub">Add some crispy goodness!</div>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none;">
+    <div class="cart-total-row">
+      <span>Total</span>
+      <span class="cart-total-amt" id="cartTotal">₹0</span>
+    </div>
+    <button class="cart-order-btn" onclick="orderOnWhatsApp()">
+      <span>📲</span> Order on WhatsApp
+    </button>
+    <button class="cart-clear-btn" onclick="clearCart()">Clear Cart</button>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -927,7 +1071,136 @@ footer .footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px s
 </footer>
 
 <script>
-  // Category pill click nav
+  // ── CART STATE ──
+  let cart = {}; // { key: { name, price, qty, emoji } }
+
+  function getItemKey(name, price) {
+    return `${name}||${price}`;
+  }
+
+  function addToCart(name, rawPrice, emoji) {
+    // parse first number from price string e.g. "₹25–30" → 25
+    const priceNum = parseInt(rawPrice.replace(/[^0-9]/g, '')) || 0;
+    const key = getItemKey(name, priceNum);
+    if (cart[key]) {
+      cart[key].qty++;
+    } else {
+      cart[key] = { name, price: priceNum, qty: 1, emoji };
+    }
+    renderCart();
+    updateFab();
+  }
+
+  function changeQty(key, delta) {
+    if (!cart[key]) return;
+    cart[key].qty += delta;
+    if (cart[key].qty <= 0) delete cart[key];
+    renderCart();
+    updateFab();
+  }
+
+  function clearCart() {
+    cart = {};
+    renderCart();
+    updateFab();
+  }
+
+  function updateFab() {
+    const totalQty = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+    const countEl = document.getElementById('cartCount');
+    countEl.textContent = totalQty;
+    countEl.classList.toggle('visible', totalQty > 0);
+    // nav badge
+    const nav = document.getElementById('navCartCount');
+    if (nav) { nav.textContent = totalQty; nav.style.display = totalQty > 0 ? 'inline' : 'none'; }
+  }
+
+  function renderCart() {
+    const items = Object.entries(cart);
+    const emptyEl = document.getElementById('cartEmpty');
+    const itemsEl = document.getElementById('cartItems');
+    const footerEl = document.getElementById('cartFooter');
+    const totalEl = document.getElementById('cartTotal');
+
+    if (items.length === 0) {
+      emptyEl.style.display = 'flex';
+      itemsEl.style.display = 'none';
+      footerEl.style.display = 'none';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+    itemsEl.style.display = 'block';
+    footerEl.style.display = 'block';
+
+    itemsEl.innerHTML = items.map(([key, item]) => `
+      <div class="cart-item">
+        <div class="cart-item-emoji">${item.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-price">₹${item.price} × ${item.qty} = ₹${item.price * item.qty}</div>
+        </div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" onclick="changeQty('${key.replace(/'/g,"\\'")}', -1)">−</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${key.replace(/'/g,"\\'")}', 1)">+</button>
+        </div>
+      </div>
+    `).join('');
+
+    const total = items.reduce((s, [, i]) => s + i.price * i.qty, 0);
+    totalEl.textContent = `₹${total}`;
+  }
+
+  function openCart() {
+    document.getElementById('cartDrawer').classList.add('open');
+    document.getElementById('cartOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCart() {
+    document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('cartOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function orderOnWhatsApp() {
+    const items = Object.values(cart);
+    if (!items.length) return;
+    const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+    const lines = items.map(i => `• ${i.emoji} *${i.name}* × ${i.qty} = ₹${i.price * i.qty}`).join('\n');
+    const msg = encodeURIComponent(
+      `Hi! I'd like to place an order from *Crispy Cravings* 🔥\n\n${lines}\n\n💰 *Total: ₹${total}*\n\nPlease confirm availability!`
+    );
+    window.open(`https://wa.me/917702216833?text=${msg}`, '_blank');
+  }
+
+  // ── ADD BTN → CART ──
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const card = btn.closest('.food-card');
+      const name  = card.querySelector('.card-name').textContent.trim();
+      const rawPrice = card.querySelector('.card-price').textContent.trim();
+      // pick best emoji from card-img
+      const emojiSpan = card.querySelector('.card-img > span:first-child');
+      const emoji = emojiSpan ? emojiSpan.textContent.trim() : '🍽️';
+
+      // visual feedback
+      btn.textContent = '✓';
+      btn.style.background = 'linear-gradient(135deg,#00C853,#00E676)';
+      btn.style.boxShadow = '0 4px 16px rgba(0,200,83,.6)';
+      setTimeout(() => {
+        btn.textContent = '+';
+        btn.style.background = '';
+        btn.style.boxShadow = '';
+      }, 500);
+
+      addToCart(name, rawPrice, emoji);
+    });
+  });
+
+  // ── CATEGORY PILL NAV ──
   document.querySelectorAll('.cat-pill').forEach(pill => {
     pill.addEventListener('click', () => {
       document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
@@ -937,29 +1210,7 @@ footer .footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px s
     });
   });
 
-  // Add btn → WhatsApp with item name
-  document.querySelectorAll('.add-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const card = btn.closest('.food-card');
-      const itemName = card.querySelector('.card-name').textContent;
-      const qty = card.querySelector('.card-qty').textContent;
-      const price = card.querySelector('.card-price').textContent.replace(/\s+/g,' ').trim();
-      const msg = encodeURIComponent(`Hi! I'd like to order from Crispy Cravings 🔥\n\n🛒 *${itemName}* (${qty}) — ${price}\n\nPlease confirm availability!`);
-      // visual feedback
-      btn.textContent = '✓';
-      btn.style.background = 'linear-gradient(135deg,#00C853,#00E676)';
-      btn.style.boxShadow = '0 4px 16px rgba(0,200,83,.6)';
-      setTimeout(() => {
-        btn.textContent = '+';
-        btn.style.background = '';
-        btn.style.boxShadow = '';
-        window.open(`https://wa.me/917702216833?text=${msg}`, '_blank');
-      }, 400);
-    });
-  });
-
-  // Scroll reveal
+  // ── SCROLL REVEAL ──
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -976,7 +1227,7 @@ footer .footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px s
     obs.observe(card);
   });
 
-  // Highlight active pill on scroll
+  // ── SCROLL ACTIVE PILL ──
   const secs = ['rolls','nuggets','momos','sides'];
   window.addEventListener('scroll', () => {
     let current = '';
@@ -988,6 +1239,9 @@ footer .footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px s
       p.classList.toggle('active', p.dataset.target === current);
     });
   });
+
+  // Keyboard close
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCart(); });
 </script>
 </body>
 </html>
